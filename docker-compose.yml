@@ -9,13 +9,15 @@ services:
       - ./git-server/keys:/git-server/keys
       - ./git-server/repos:/git-server/repos
   gocd-server-docker:
-    image: "gocd/gocd-server:v17.7.0"
+    image: "gocd-server-custom:latest"
     ports:
       - "8153:8153"
       - "8154:8154"
     volumes:
       - ./gocd-server/godata:/godata
       - ./gocd-server/home-dir:/home/go
+    depends_on:
+      - "git-docker"
   gocd-agent1-docker:
     image: "gocd-agent-custom:latest"
     environment:
@@ -24,3 +26,5 @@ services:
       - ./gocd-agent1/godata:/godata
       - ./gocd-agent1/go:/go
       - ./gocd-agent1/home-dir:/home/go
+    depends_on:
+      - "git-docker"

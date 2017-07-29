@@ -2,7 +2,7 @@
 
 pwd=$(pwd)
 
-# Prepare git server
+############# Prepare git server
 echo "Preparing Git server..."
 
 ! rm -rf ./temp
@@ -18,21 +18,26 @@ git clone --bare myrepo myrepo.git
 
 cp -r myrepo.git $pwd/git-server/repos/
 
-# Prepare GOCD Server
+############# Prepare GOCD Server
 echo "Preparing Go CD server..."
 cd $pwd
 ! mkdir ./gocd-server/home-dir/.ssh
 cp ./git-server/keys/id_rsa_git_test.pub ./gocd-server/home-dir/.ssh/id_rsa.pub
 cp ./git-server/keys/id_rsa_git_test ./gocd-server/home-dir/.ssh/id_rsa
 
-# Prepare GOCD Agent
+cd $pwd
+cd docker-gocd-server
+docker build -t gocd-server-custom .
+
+############# Prepare GOCD Agent
 echo "Preparing Go CD agent..."
+cd $pwd
 ! mkdir ./gocd-agent1/home-dir/.ssh
 cp ./git-server/keys/id_rsa_git_test.pub ./gocd-agent1/home-dir/.ssh/id_rsa.pub
 cp ./git-server/keys/id_rsa_git_test ./gocd-agent1/home-dir/.ssh/id_rsa
 
 cd $pwd
-cd docker-gocd-agent-custom
+cd docker-gocd-agent
 docker build -t gocd-agent-custom .
 
 # Start things up
@@ -47,7 +52,5 @@ docker-compose ps
 
 # Use 0.0.0.0:8153 to do anything in the browser, otherwise CSRF errors on server
 #curl 0.0.0.0:8153
-
-# ssh-keyscan -t rsa git-docker  > /home/go/.ssh/known_hosts
 
 # ssh://git@git-docker/git-server/repos/myrepo.git

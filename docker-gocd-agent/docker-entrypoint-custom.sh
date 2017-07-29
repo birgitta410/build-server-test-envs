@@ -25,7 +25,7 @@ function start() {
 trap stop TERM INT SIGHUP
 start
 
-sleep 5
+sleep 2
 ./know_git-server.sh
 
 wait $gocd_pid
