@@ -49,13 +49,8 @@ docker-compose up -d
 sleep 2
 docker-compose ps
 
-echo "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
-echo "Wait for GoCD server to start up, then visit http://0.0.0.0:8153/go/pipelines"
-echo "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
-#sleep 10
-#ssh git@localhost -p 2222 -i /Users/Shared/projects/build_monitors/monart/scripts/git-server/keys/id_rsa_git_test
-
-# Use 0.0.0.0:8153 to do anything in the browser, otherwise CSRF errors on server
-#curl 0.0.0.0:8153
-
-# ssh://git@git-docker/git-server/repos/myrepo.git
+echo "##################################################################"
+echo "GoCD server takes a little bit to start up, wait for it..."
+echo "...then visit http://0.0.0.0:8153/go/pipelines (using localhost might have CSRF issues)"
+echo "Enable the agent under 'Agents', then create a pipeline with Material 'ssh://git@git-docker/git-server/repos/myrepo.git'"
+echo "##################################################################"
