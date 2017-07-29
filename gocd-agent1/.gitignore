@@ -1,0 +1,9 @@
+.ssh/
+addons/
+artifacts/
+config/
+db/
+logs/
+plugins/
+pipelines/
+go/

@@ -1,2 +1,3 @@
 git-server/keys/id_rsa_git_test
 git-server/keys/id_rsa_git_test.pub
+gocd-server/cruise-config.xml

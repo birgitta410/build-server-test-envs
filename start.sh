@@ -18,13 +18,25 @@ git clone --bare myrepo myrepo.git
 
 cp -r myrepo.git $pwd/git-server/repos/
 
-# Prepare gocd
-echo "Preparing Go CD..."
+# Prepare GOCD Server
+echo "Preparing Go CD server..."
 cd $pwd
+! mkdir ./gocd-server/home-dir/.ssh
 cp ./git-server/keys/id_rsa_git_test.pub ./gocd-server/home-dir/.ssh/id_rsa.pub
 cp ./git-server/keys/id_rsa_git_test ./gocd-server/home-dir/.ssh/id_rsa
 
+# Prepare GOCD Agent
+echo "Preparing Go CD agent..."
+! mkdir ./gocd-agent1/home-dir/.ssh
+cp ./git-server/keys/id_rsa_git_test.pub ./gocd-agent1/home-dir/.ssh/id_rsa.pub
+cp ./git-server/keys/id_rsa_git_test ./gocd-agent1/home-dir/.ssh/id_rsa
+
+cd $pwd
+cd docker-gocd-agent-custom
+docker build -t gocd-agent-custom .
+
 # Start things up
+cd $pwd
 docker-compose up -d
 
 sleep 2

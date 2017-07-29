@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cruise xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cruise-config.xsd" schemaVersion="93">
+  <server artifactsdir="artifacts" agentAutoRegisterKey="79de25ea-39f2-40ef-984c-0be15d5d210f" webhookSecret="fdf46856-8afe-4801-bd31-89027d47e418" commandRepositoryLocation="default" serverId="611d20ef-49ad-454d-be70-26a27ebc8fd8" />
+  <pipelines group="defaultGroup">
+    <pipeline name="test">
+      <materials>
+        <git url="ssh://git@git-docker/git-server/repos/myrepo.git" />
+      </materials>
+      <stage name="defaultStage">
+        <jobs>
+          <job name="defaultJob">
+            <tasks>
+              <exec command="echo">
+                <arg>"hello"</arg>
+              </exec>
+            </tasks>
+          </job>
+        </jobs>
+      </stage>
+    </pipeline>
+  </pipelines>
+  <agents>
+    <agent hostname="0e6a7b303ea2" ipaddress="172.19.0.4" uuid="10bd3d1a-f5a1-4d82-b0a4-42be2bcca45e" />
+  </agents>
+</cruise>
