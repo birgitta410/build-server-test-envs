@@ -5,18 +5,18 @@ pwd=$(pwd)
 ############# Prepare git server
 echo "Preparing Git server..."
 
-! rm -rf ./temp
-mkdir -p temp/myrepo
+! rm -rf ./git-server/temp
+mkdir -p ./git-server/temp/myrepo
 
-cp git-server/README.md temp/myrepo
-cd temp/myrepo
+cp ./git-server/README.md ./git-server/temp/myrepo
+cd ./git-server/temp/myrepo
 git init --shared=true
 git add .
 git commit -m "first commit"
-cd $pwd/temp
+cd $pwd/git-server/temp
 git clone --bare myrepo myrepo.git
 
-cp -r myrepo.git $pwd/git-server/repos/
+cp -r myrepo.git $pwd/git-server/repos/myrepo.git
 
 ############# Prepare GOCD Server
 echo "Preparing Go CD server..."
@@ -49,6 +49,9 @@ docker-compose up -d
 sleep 2
 docker-compose ps
 
+echo "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
+echo "Wait for GoCD server to start up, then visit http://0.0.0.0:8153/go/pipelines"
+echo "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
 #sleep 10
 #ssh git@localhost -p 2222 -i /Users/Shared/projects/build_monitors/monart/scripts/git-server/keys/id_rsa_git_test
 
