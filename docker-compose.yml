@@ -1,0 +1,18 @@
+version: '2'
+services:
+  git-docker:
+    image: "jkarlos/git-server-docker"
+    ports:
+      - "2222:22"
+      - "4443:43"
+    volumes:
+      - ./git-server/keys:/git-server/keys
+      - ./git-server/repos:/git-server/repos
+  gocd-docker:
+    image: "gocd/gocd-server:v17.7.0"
+    ports:
+      - "8153:8153"
+      - "8154:8154"
+    volumes:
+      - ./gocd-server/godata:/godata
+      - ./gocd-server/home-dir:/home/go

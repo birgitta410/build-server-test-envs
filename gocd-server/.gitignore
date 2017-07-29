@@ -1,0 +1,7 @@
+.ssh/
+addons/
+artifacts/
+config/
+db/
+logs/
+plugins/
