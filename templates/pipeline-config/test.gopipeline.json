@@ -1,0 +1,36 @@
+{
+  "group": "group1",
+  "name": "testPipeline",
+  "environment_variables": [],
+  "materials": [
+    {
+      "type": "git",
+      "url": "ssh://git@git-docker/git-server/repos/myrepo.git",
+      "name": "myrepo"
+    }
+  ],
+  "stages": [
+    {
+      "name": "randomlySuccessful",
+      "fetch_materials": true,
+      "jobs": [
+        {
+          "name": "run",
+          "tasks": [
+            {
+              "type": "exec",
+              "command": "echo",
+              "arguments": [
+                "hello pipeline"
+              ]
+            },
+            {
+              "type": "exec",
+              "command": "./randomlyFails.sh"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

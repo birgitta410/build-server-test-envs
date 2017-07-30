@@ -6,67 +6,93 @@ rootDir=$(pwd)
 ! docker-compose stop
 ! docker-compose rm  -f
 
-# Building docker images
-cd docker-gocd-server
+# Build docker images
+cd $rootDir/docker-gocd-server
 docker build -t gocd-server-custom .
-cd ../docker-gocd-agent
+cd $rootDir/docker-gocd-agent
 docker build -t gocd-agent-custom .
-cd ..
 
 # Prepare the local environment directory
+cd $rootDir/
 ! rm -rf environment
 mkdir environment
 mkdir ./environment/git-server
 mkdir ./environment/gocd-server
 mkdir ./environment/gocd-agent1
 
-cd environment
-envDir=$(pwd)
+envDir=$rootDir/environment
 
+#####################################################
 ############# Prepare git server
 echo "Preparing Git server..."
-cd $envDir
+gitServerDir=$envDir/git-server
 
-mkdir $envDir/git-server/keys
-mkdir $envDir/git-server/repos
-mkdir -p $envDir/git-server/myrepo-checked-out
+mkdir $gitServerDir/keys
+mkdir $gitServerDir/repos
 
 # Create key pair for communication between servers
-ssh-keygen -t rsa -C "local-gocd-env" -f $envDir/git-server/keys/id_rsa_gocd_env -q -N ""
+keyName=id_rsa_gocd_env
+ssh-keygen -t rsa -C "local-gocd-env" -f $gitServerDir/keys/$keyName -q -N ""
 
-echo "A test repo for local GoCD environment" > $envDir/git-server/myrepo-checked-out/README.md
-cp $rootDir/templates/randomlyFails.sh $envDir/git-server/myrepo-checked-out/
-cp $rootDir/templates/git_local_server.sh $envDir/git-server/myrepo-checked-out/
-echo "git_local_server.sh" > $envDir/git-server/myrepo-checked-out/.gitignore
-cd $envDir/git-server/myrepo-checked-out
-git init --shared=true
-git add .
-git commit -m "first commit"
-cd $envDir/git-server
-git clone --bare myrepo-checked-out myrepo.git
+# Create repositories
 
-mv myrepo.git $envDir/git-server/repos/myrepo.git
+function create_repo() {
+  # Utility script to send git commands to server later
+  cp $rootDir/templates/git_local_server.sh $gitServerDir/$repoName/
+  echo "git_local_server.sh" > $gitServerDir/$repoName/.gitignore
 
+  cd $gitServerDir/$repoName
+  git init --shared=true
+  git add .
+  git commit -m "first commit"
+  cd $gitServerDir
+  git clone --bare $1 $1.git
+  mv $1.git $gitServerDir/repos/$1.git
+}
+
+repoName=myrepo
+mkdir -p $gitServerDir/$repoName
+  echo "A test repo for local GoCD environment" > $gitServerDir/$repoName/README.md
+  cp $rootDir/templates/randomlyFails.sh $gitServerDir/$repoName/
+create_repo $repoName
+
+repoName=gocd-config
+mkdir -p $gitServerDir/$repoName
+  echo "A repo to hold Go CD config" > $gitServerDir/$repoName/README.md
+  cp $rootDir/templates/pipeline-config/*.gopipeline.json $gitServerDir/$repoName/
+create_repo $repoName
+
+#####################################################
 ############# Prepare GOCD Server
 echo "Preparing Go CD server..."
+goServerDir=$envDir/gocd-server
 
-mkdir -p $envDir/gocd-server/home-dir/.ssh
-mkdir -p $envDir/gocd-server/godata
+mkdir -p $goServerDir/home-dir/.ssh
+mkdir -p $goServerDir/godata
 
-cp $envDir/git-server/keys/id_rsa_gocd_env.pub $envDir/gocd-server/home-dir/.ssh/id_rsa.pub
-cp $envDir/git-server/keys/id_rsa_gocd_env $envDir/gocd-server/home-dir/.ssh/id_rsa
-chmod 600 $envDir/gocd-server/home-dir/.ssh/id_rsa
+cp $gitServerDir/keys/$keyName.pub $goServerDir/home-dir/.ssh/id_rsa.pub
+cp $gitServerDir/keys/$keyName $goServerDir/home-dir/.ssh/id_rsa
+chmod 600 $goServerDir/home-dir/.ssh/id_rsa
 
+mkdir -p $goServerDir/godata/plugins/external
+wget https://github.com/tomzo/gocd-json-config-plugin/releases/download/0.2.0/json-config-plugin-0.2.jar -O $goServerDir/godata/plugins/external/json-config-plugin-0.2.jar
+
+mkdir -p $goServerDir/godata/config
+cp $rootDir/templates/cruise-config.xml $goServerDir/godata/config
+
+#####################################################
 ############# Prepare GOCD Agent
 echo "Preparing Go CD agent..."
+goAgentDir=$envDir/gocd-agent1
 
-mkdir -p $envDir/gocd-agent1/home-dir/.ssh
-mkdir -p $envDir/gocd-agent1/godata
+mkdir -p $goAgentDir/home-dir/.ssh
+mkdir -p $goAgentDir/godata
 
-cp $envDir/git-server/keys/id_rsa_gocd_env.pub $envDir/gocd-agent1/home-dir/.ssh/id_rsa.pub
-cp $envDir/git-server/keys/id_rsa_gocd_env $envDir/gocd-agent1/home-dir/.ssh/id_rsa
-chmod 600 $envDir/gocd-agent1/home-dir/.ssh/id_rsa
+cp $gitServerDir/keys/$keyName.pub $goAgentDir/home-dir/.ssh/id_rsa.pub
+cp $gitServerDir/keys/$keyName $goAgentDir/home-dir/.ssh/id_rsa
+chmod 600 $goAgentDir/home-dir/.ssh/id_rsa
 
+#####################################################
 ############# Start things up
 cd $rootDir
 docker-compose up -d
@@ -74,9 +100,11 @@ docker-compose up -d
 sleep 2
 docker-compose ps
 
+echo ""
 echo "##################################################################"
 echo "GoCD server takes a little bit to start up, wait for it..."
-echo "...then visit http://0.0.0.0:8153/go/pipelines (using localhost might have CSRF issues)"
+echo "[ tail logs with 'tail -f environment/gocd-server/godata/logs/go-server.log' ]"
+echo "...then visit http://0.0.0.0:8153/go/pipelines (using localhost causes CSRF issues)"
+echo "Wait for pipeline configured through JSON plugin to show up under 'Pipelines'."
 echo "Wait for the agent to show up under 'Agents' and enable it."
-echo "Then create a pipeline with Material 'ssh://git@git-docker/git-server/repos/myrepo.git'"
 echo "##################################################################"
