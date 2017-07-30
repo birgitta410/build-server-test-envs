@@ -8,4 +8,4 @@ docker-compose stop
 docker-compose up
 ```
 
-Will mount the `godata` directories from `./gocd-server/godata` and `./gocd-agent1/godata`, so you can mess around with config etc. from right there.
+Will mount the `godata` directories from `./environment/gocd-server/godata` and `./environment/gocd-agent1/godata`, so you can mess around with config etc. from right there.
