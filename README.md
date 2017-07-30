@@ -8,4 +8,14 @@ docker-compose stop
 docker-compose up
 ```
 
+## GoCD
 Will mount the `godata` directories from `./environment/gocd-server/godata` and `./environment/gocd-agent1/godata`, so you can mess around with config etc. from right there.
+
+## Git
+Will create a little test repository. This is how you can push to it:
+
+```
+cd ./environment/git-server/myrepo-checked-out
+./git_local_server.sh "git fetch" # Should be able to successfully contact the git server in Docker
+# make your changes and use that same script to execute more git commands
+```

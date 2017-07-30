@@ -29,21 +29,23 @@ cd $envDir
 
 mkdir $envDir/git-server/keys
 mkdir $envDir/git-server/repos
-mkdir -p $envDir/git-server/temp/myrepo
+mkdir -p $envDir/git-server/myrepo-checked-out
 
 # Create key pair for communication between servers
 ssh-keygen -t rsa -C "local-gocd-env" -f $envDir/git-server/keys/id_rsa_gocd_env -q -N ""
 
-echo "A test repo for local GoCD environment" > $envDir/git-server/temp/myrepo/README.md
-cp $rootDir/randomlyFails.sh $envDir/git-server/temp/myrepo/
-cd $envDir/git-server/temp/myrepo
+echo "A test repo for local GoCD environment" > $envDir/git-server/myrepo-checked-out/README.md
+cp $rootDir/templates/randomlyFails.sh $envDir/git-server/myrepo-checked-out/
+cp $rootDir/templates/git_local_server.sh $envDir/git-server/myrepo-checked-out/
+echo "git_local_server.sh" > $envDir/git-server/myrepo-checked-out/.gitignore
+cd $envDir/git-server/myrepo-checked-out
 git init --shared=true
 git add .
 git commit -m "first commit"
-cd $envDir/git-server/temp
-git clone --bare myrepo myrepo.git
+cd $envDir/git-server
+git clone --bare myrepo-checked-out myrepo.git
 
-cp -r myrepo.git $envDir/git-server/repos/myrepo.git
+mv myrepo.git $envDir/git-server/repos/myrepo.git
 
 ############# Prepare GOCD Server
 echo "Preparing Go CD server..."
