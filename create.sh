@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
-set -ex
+set -e
 
 rootDir=$(pwd)
+
+! docker-compose stop
+! docker-compose rm  -f
 
 # Building docker images
 cd docker-gocd-server
@@ -20,8 +23,6 @@ mkdir ./environment/gocd-agent1
 cd environment
 envDir=$(pwd)
 
-
-
 ############# Prepare git server
 echo "Preparing Git server..."
 cd $envDir
@@ -33,7 +34,8 @@ mkdir -p $envDir/git-server/temp/myrepo
 # Create key pair for communication between servers
 ssh-keygen -t rsa -C "local-gocd-env" -f $envDir/git-server/keys/id_rsa_gocd_env -q -N ""
 
-echo "A first file for the repo" > $envDir/git-server/temp/myrepo/README.md
+echo "A test repo for local GoCD environment" > $envDir/git-server/temp/myrepo/README.md
+cp $rootDir/randomlyFails.sh $envDir/git-server/temp/myrepo/
 cd $envDir/git-server/temp/myrepo
 git init --shared=true
 git add .
@@ -73,5 +75,6 @@ docker-compose ps
 echo "##################################################################"
 echo "GoCD server takes a little bit to start up, wait for it..."
 echo "...then visit http://0.0.0.0:8153/go/pipelines (using localhost might have CSRF issues)"
-echo "Enable the agent under 'Agents', then create a pipeline with Material 'ssh://git@git-docker/git-server/repos/myrepo.git'"
+echo "Wait for the agent to show up under 'Agents' and enable it."
+echo "Then create a pipeline with Material 'ssh://git@git-docker/git-server/repos/myrepo.git'"
 echo "##################################################################"

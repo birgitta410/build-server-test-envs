@@ -1,0 +1,20 @@
+<pipelines group="defaultGroup">
+  <pipeline name="test">
+    <materials>
+      <git url="ssh://git@git-docker/git-server/repos/myrepo.git" />
+    </materials>
+    <stage name="randomSuccessOrFailure">
+      <jobs>
+        <job name="run">
+          <tasks>
+            <exec command="echo">
+              <arg>"hello"</arg>
+            </exec>
+            <exec command="./randomlyFails.sh">
+            </exec>
+          </tasks>
+        </job>
+      </jobs>
+    </stage>
+  </pipeline>
+</pipelines>
