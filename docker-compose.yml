@@ -24,7 +24,6 @@ services:
       - GO_SERVER_URL=https://gocd-server-docker:8154/go
     volumes:
       - ./environment/gocd-agent1/godata:/godata
-      - ./environment/gocd-agent1/go:/go
       - ./environment/gocd-agent1/home-dir:/home/go
     depends_on:
       - "git-docker"
