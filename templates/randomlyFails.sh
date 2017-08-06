@@ -1,4 +1,4 @@
 #! /bin/bash
 set -xe
 
-if (( RANDOM % 2 )); then ls; else oops-failing-on-purpose; fi
+if (( RANDOM % 5 )); then oops-failing-on-purpose; else ls; fi
