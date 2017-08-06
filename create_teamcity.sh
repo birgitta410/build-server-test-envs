@@ -94,8 +94,8 @@ docker-compose ps
 
 echo ""
 echo "##################################################################"
-echo "[ tail server logs with 'tail -f environment/teamcity-server/logs/teamcity-server.log' ]"
-echo "[ tail agent logs with 'tail -f environment/teamcity-agent1/logs/teamcity-agent.log' ]"
+echo "[ tail server logs with 'tail -f environment/teamcity/teamcity-server/logs/teamcity-server.log' ]"
+echo "[ tail agent logs with 'tail -f environment/teamcity/teamcity-agent1/logs/teamcity-agent.log' ]"
 echo "TeamCity is available at http://0.0.0.0:8111/"
 # echo "Wait for pipeline configured through JSON plugin to show up under 'Pipelines'."
 echo "Wait for the agent to show up under 'Agents' > 'Unauthorized' and authorize it, then wait for it to show up under 'Connected'."
