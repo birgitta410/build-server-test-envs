@@ -1,6 +1,16 @@
 #!/usr/bin/env bash
 set -e
 
+echo -n "This will delete all files of previous GoCD environments - sure you want to continue? (y/n)"
+read answer
+if echo "$answer" | grep -iq "^y" ;then
+    echo "Will continue to create a fresh environment"
+else
+    echo "Exiting"
+    exit
+fi
+
+
 rootDir=$(pwd)
 
 cd $rootDir/gocd
