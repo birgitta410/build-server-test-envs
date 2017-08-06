@@ -1,0 +1,31 @@
+version: '2'
+services:
+  git-docker:
+    image: "jkarlos/git-server-docker"
+    ports:
+      - "2222:22"
+      - "4443:43"
+    volumes:
+      - ../environment/git-server/keys:/git-server/keys
+      - ../environment/git-server/repos:/git-server/repos
+  teamcity-server-docker:
+    image: "jetbrains/teamcity-server"
+    ports:
+      - "8111:8111"
+    volumes:
+      - ../environment/teamcity-server/datadir:/data/teamcity_server/datadir
+      - ../environment/teamcity-server/logs:/opt/teamcity/logs
+      - ../environment/teamcity-server/home-dir:/home
+    depends_on:
+      - "git-docker"
+  teamcity-agent1-docker:
+    image: "jetbrains/teamcity-agent"
+    environment:
+      - SERVER_URL=http://teamcity-server-docker:8111/
+    volumes:
+      - ../environment/teamcity-agent1/conf:/data/teamcity_agent/conf
+      - ../environment/teamcity-agent1/logs:/opt/buildagent/logs
+      - ../environment/teamcity-agent1/home-dir:/home/buildagent
+    depends_on:
+      - "git-docker"
+      - "teamcity-server-docker"

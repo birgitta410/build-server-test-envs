@@ -3,6 +3,7 @@ set -e
 
 rootDir=$(pwd)
 
+cd $rootDir/gocd-env
 ! docker-compose stop
 ! docker-compose rm  -f
 
@@ -94,7 +95,7 @@ chmod 600 $goAgentDir/home-dir/.ssh/id_rsa
 
 #####################################################
 ############# Start things up
-cd $rootDir
+cd $rootDir/gocd-env
 docker-compose up -d
 
 sleep 2
