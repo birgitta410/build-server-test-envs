@@ -16,7 +16,7 @@ docker-compose up
 Will create a Git server with a little test repository (`ssh://git@git-<gocd | teamcity>-docker/git-server/repos/myrepo.git`) that can be used as material for build configurations. This is how you can push to it:
 
 ```
-cd ./environment/<gocd | teamcity>/git-server/myrepo-checked-out
+cd ./environment/<gocd | teamcity>/git-server/myrepo
 ./git_local_server.sh "git fetch" # Should be able to successfully contact the git server in Docker
 # make your changes and use that same script to execute more git commands
 ```
