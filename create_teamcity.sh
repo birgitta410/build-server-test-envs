@@ -3,21 +3,21 @@ set -e
 
 rootDir=$(pwd)
 
-cd $rootDir/teamcity-env
+cd $rootDir/teamcity
 ! docker-compose stop
 ! docker-compose rm  -f
 
 
 # Prepare the local environment directory
 cd $rootDir/
-# ! rm -rf environment
-! rm -rf environment/git-server
-# mkdir environment
-mkdir ./environment/git-server
-# mkdir ./environment/teamcity-server
-# mkdir ./environment/teamcity-agent1
+! rm -rf environment/teamcity
+mkdir -p environment/teamcity
+envDir=$rootDir/environment/teamcity
 
-envDir=$rootDir/environment
+mkdir $envDir/git-server
+mkdir $envDir/teamcity-server
+mkdir $envDir/teamcity-agent1
+
 
 #####################################################
 ############# Prepare git server
@@ -28,14 +28,14 @@ mkdir $gitServerDir/keys
 mkdir $gitServerDir/repos
 
 # Create key pair for communication between servers
-keyName=id_rsa_gocd_env
+keyName=id_rsa_teamcity_env
 ssh-keygen -t rsa -C "local-gocd-env" -f $gitServerDir/keys/$keyName -q -N ""
 
 # Create repositories
 
 function create_repo() {
   # Utility script to send git commands to server later
-  cp $rootDir/templates/git_local_server.sh $gitServerDir/$repoName/
+  cp $rootDir/teamcity/templates/git_local_server.sh $gitServerDir/$repoName/
   echo "git_local_server.sh" > $gitServerDir/$repoName/.gitignore
 
   cd $gitServerDir/$repoName
@@ -86,7 +86,7 @@ chmod 600 $teamCityAgentDir/home-dir/.ssh/id_rsa
 
 #####################################################
 ############# Start things up
-cd $rootDir/teamcity-env
+cd $rootDir/teamcity
 docker-compose up -d
 
 sleep 2

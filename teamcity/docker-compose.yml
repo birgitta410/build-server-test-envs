@@ -1,10 +1,10 @@
 version: '2'
 services:
-  git-docker:
+  git-teamcity-docker:
     image: "jkarlos/git-server-docker"
     ports:
-      - "2222:22"
-      - "4443:43"
+      - "2223:22"
+      - "4444:43"
     volumes:
       - ../environment/git-server/keys:/git-server/keys
       - ../environment/git-server/repos:/git-server/repos
@@ -17,7 +17,7 @@ services:
       - ../environment/teamcity-server/logs:/opt/teamcity/logs
       - ../environment/teamcity-server/home-dir:/home
     depends_on:
-      - "git-docker"
+      - "git-teamcity-docker"
   teamcity-agent1-docker:
     image: "jetbrains/teamcity-agent"
     environment:
@@ -27,5 +27,5 @@ services:
       - ../environment/teamcity-agent1/logs:/opt/buildagent/logs
       - ../environment/teamcity-agent1/home-dir:/home/buildagent
     depends_on:
-      - "git-docker"
+      - "git-teamcity-docker"
       - "teamcity-server-docker"

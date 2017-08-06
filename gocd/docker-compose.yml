@@ -1,29 +1,29 @@
 version: '2'
 services:
-  git-docker:
+  git-gocd-docker:
     image: "jkarlos/git-server-docker"
     ports:
       - "2222:22"
       - "4443:43"
     volumes:
-      - ../environment/git-server/keys:/git-server/keys
-      - ../environment/git-server/repos:/git-server/repos
+      - ../environment/gocd/git-server/keys:/git-server/keys
+      - ../environment/gocd/git-server/repos:/git-server/repos
   gocd-server-docker:
     image: "gocd-server-custom:latest"
     ports:
       - "8153:8153"
       - "8154:8154"
     volumes:
-      - ../environment/gocd-server/godata:/godata
-      - ../environment/gocd-server/home-dir:/home/go
+      - ../environment/gocd/gocd-server/godata:/godata
+      - ../environment/gocd/gocd-server/home-dir:/home/go
     depends_on:
-      - "git-docker"
+      - "git-gocd-docker"
   gocd-agent1-docker:
     image: "gocd-agent-custom:latest"
     environment:
       - GO_SERVER_URL=https://gocd-server-docker:8154/go
     volumes:
-      - ../environment/gocd-agent1/godata:/godata
-      - ../environment/gocd-agent1/home-dir:/home/go
+      - ../environment/gocd/gocd-agent1/godata:/godata
+      - ../environment/gocd/gocd-agent1/home-dir:/home/go
     depends_on:
-      - "git-docker"
+      - "gocd-server-docker"

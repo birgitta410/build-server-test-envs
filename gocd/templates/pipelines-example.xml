@@ -1,7 +1,7 @@
 <pipelines group="defaultGroup">
   <pipeline name="test">
     <materials>
-      <git url="ssh://git@git-docker/git-server/repos/myrepo.git" />
+      <git url="ssh://git@git-gocd-docker/git-server/repos/myrepo.git" />
     </materials>
     <stage name="randomSuccessOrFailure">
       <jobs>

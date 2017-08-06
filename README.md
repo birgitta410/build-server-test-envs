@@ -7,13 +7,13 @@ Both `create_*.sh` scripts tear down and recreate a directory `environment` that
 
 After created, you can stop and start the stack again with `docker-compose`:
 ```
-cd gocd-env # OR cd teamcity-env
+cd gocd # OR cd teamcity
 docker-compose stop
 docker-compose up
 ```
 
 ## Git Server
-Will create a Git server with a little test repository (`ssh://git@git-docker/git-server/repos/myrepo.git`) that can be used as material for build configurations. This is how you can push to it:
+Will create a Git server with a little test repository (`ssh://git@git-<gocd | teamcity>-docker/git-server/repos/myrepo.git`) that can be used as material for build configurations. This is how you can push to it:
 
 ```
 cd ./environment/git-server/myrepo-checked-out

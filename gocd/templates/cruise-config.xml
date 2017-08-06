@@ -3,7 +3,7 @@
   <server artifactsdir="artifacts" agentAutoRegisterKey="b09bcbe3-d9ec-4cd0-9f5e-786f39e5228d" webhookSecret="e9a89f50-ac9f-4b32-981d-623bf82526fc" commandRepositoryLocation="default" serverId="d9605b89-9169-4758-a076-b2a85df349cf" />
   <config-repos>
     <config-repo plugin="json.config.plugin">
-      <git url="ssh://git@git-docker/git-server/repos/gocd-config.git" />
+      <git url="ssh://git@git-gocd-docker/git-server/repos/gocd-config.git" />
     </config-repo>
   </config-repos>
 </cruise>

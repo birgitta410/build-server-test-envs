@@ -5,7 +5,7 @@
   "materials": [
     {
       "type": "git",
-      "url": "ssh://git@git-docker/git-server/repos/myrepo.git",
+      "url": "ssh://git@git-gocd-docker/git-server/repos/myrepo.git",
       "name": "myrepo"
     }
   ],
