@@ -8,4 +8,4 @@ repoName=$(basename "$PWD")
 
 gitCmd=$1
 
-ssh-agent bash -c "ssh-add ../keys/id_teamcity_gocd_env; ${gitCmd}"
+ssh-agent bash -c "ssh-add ../keys/id_rsa_teamcity_env; ${gitCmd}"
