@@ -63,11 +63,6 @@ mkdir -p $gitServerDir/$repoName
   cp $rootDir/templates/randomlyFails.sh $gitServerDir/$repoName/
 create_repo $repoName
 
-repoName=teamcity-config
-mkdir -p $gitServerDir/$repoName
-  echo "A repo to hold TeamCity config" > $gitServerDir/$repoName/README.md
-create_repo $repoName
-
 #####################################################
 ############# Prepare Teamcity Server
 echo "Preparing TeamCity server..."
@@ -80,6 +75,9 @@ mkdir -p $teamCityServerDir/logs
 cp $gitServerDir/keys/$keyName.pub $teamCityServerDir/home-dir/.ssh/id_rsa.pub
 cp $gitServerDir/keys/$keyName $teamCityServerDir/home-dir/.ssh/id_rsa
 chmod 600 $teamCityServerDir/home-dir/.ssh/id_rsa
+
+mkdir -p $teamCityServerDir/datadir/config
+cp -r $rootDir/teamcity/templates/config $teamCityServerDir/datadir/
 
 #####################################################
 ############# Prepare TeamCity Agent
@@ -106,7 +104,7 @@ echo ""
 echo "##################################################################"
 echo "[ tail server logs with 'tail -f environment/teamcity/teamcity-server/logs/teamcity-server.log' ]"
 echo "[ tail agent logs with 'tail -f environment/teamcity/teamcity-agent1/logs/teamcity-agent.log' ]"
-echo "TeamCity is available at http://0.0.0.0:8111/"
-echo "To get Super User authentication token: 'cat environment/teamcity/teamcity-server/logs/teamcity-server.log | grep Super'"
-echo "Wait for the agent to show up under 'Agents' > 'Unauthorized' and authorize it, then wait for it to show up under 'Connected'."
+echo "Go to http://0.0.0.0:8111/ to click through initial setup"
+echo "Wait for the agent to show up and authorize it here: http://0.0.0.0:8111/agents.html?tab=unauthorizedAgents"
+echo "CC Tray is available without authentication at http://0.0.0.0:8111/guestAuth/app/rest/cctray/projects.xml"
 echo "##################################################################"
