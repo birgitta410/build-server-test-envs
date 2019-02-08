@@ -1,0 +1,27 @@
+version: "2.4"
+
+services:
+  concourse-server:
+    image: concourse/concourse:4.2.2
+    command: "quickstart --add-local-user=user:password --main-team-local-user=user --external-url=http://localhost:8080 --postgres-user=concourse --postgres-password=password --postgres-host=concourse-db --worker-garden-dns-server 8.8.8.8"
+    ports:
+      - "8080:8080"
+    privileged: true
+    volumes:
+      - ../environment/concourse/concourse-server/home-dir:/root
+
+  concourse-db:
+    image: postgres:11.1
+    environment:
+      POSTGRES_USER: "concourse"
+      POSTGRES_PASSWORD: "password"
+      POSTGRES_DB: "atc"
+  
+  concourse-git:
+    image: "jkarlos/git-server-docker"
+    ports:
+      - "2222:22"
+      - "4443:43"
+    volumes:
+      - ../environment/concourse/git-server/keys:/git-server/keys
+      - ../environment/concourse/git-server/repos:/git-server/repos

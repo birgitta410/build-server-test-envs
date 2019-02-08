@@ -1,0 +1,23 @@
+resources:
+- name: git
+  type: git
+  source:
+    branch: master
+    uri: ssh://git@concourse-git/git-server/repos/myrepo.git
+    private_key: ((github-private-key))
+
+jobs:
+- name: get-git
+  plan:
+    - aggregate:
+      - get: git
+        trigger: true
+    - task: do-stuff-with-git
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source: {repository: alpine}
+        run:
+          path: echo
+          args: ["Hello, world!"]
