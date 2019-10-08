@@ -43,17 +43,17 @@ setup() {
     # Create repositories
 
     function create_repo() {
-    # Utility script to send git commands to server later
-    cp $rootDir/concourse/templates/git_local_server.sh $gitServerDir/$repoName/
-    echo "git_local_server.sh" > $gitServerDir/$repoName/.gitignore
+        # Utility script to send git commands to server later
+        cp $rootDir/concourse/templates/git_local_server.sh $gitServerDir/$repoName/
+        echo "git_local_server.sh" > $gitServerDir/$repoName/.gitignore
 
-    cd $gitServerDir/$repoName
-    git init --shared=true
-    git add .
-    git commit -m "first commit"
-    cd $gitServerDir
-    git clone --bare $1 $1.git
-    mv $1.git $gitServerDir/repos/$1.git
+        cd $gitServerDir/$repoName
+        git init --shared=true
+        git add .
+        git commit -m "first commit"
+        cd $gitServerDir
+        git clone --bare $1 $1.git
+        mv $1.git $gitServerDir/repos/$1.git
     }
 
     repoName=myrepo
@@ -114,8 +114,8 @@ provision_pipeline() {
     "$fly_bin" -t buildviz login -c "$BASE_URL" -u user -p password
     "$fly_bin" -t buildviz set-pipeline -p pipeline -c "${rootDir}/concourse/templates/pipeline.yml" -n -l "${concourseDir}/credentials.yml"
     "$fly_bin" -t buildviz unpause-pipeline -p pipeline
-    "$fly_bin" -t buildviz unpause-job -j pipeline/get-git
-    "$fly_bin" -t buildviz trigger-job -j pipeline/get-git
+    "$fly_bin" -t buildviz unpause-job -j pipeline/build-and-test
+    "$fly_bin" -t buildviz trigger-job -j pipeline/build-and-test
     rm "$fly_bin"
     
 }

@@ -7,12 +7,12 @@ resources:
     private_key: ((github-private-key))
 
 jobs:
-- name: get-git
+- name: build-and-test
   plan:
     - aggregate:
       - get: git
         trigger: true
-    - task: do-stuff-with-git
+    - task: build-and-test
       config:
         platform: linux
         image_resource:
@@ -20,4 +20,36 @@ jobs:
           source: {repository: alpine}
         run:
           path: echo
-          args: ["Hello, world!"]
+          args: ["Hello, build!"]
+- name: deploy-test
+  serial: true
+  plan:
+    - aggregate:
+      - get: git
+        passed: [build-and-test]
+        trigger: true
+    - task: deploy
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source: {repository: alpine}
+        run:
+          path: echo
+          args: ["Hello, deploy to test!"]
+
+- name: deploy-prod
+  serial: true
+  plan:
+    - aggregate:
+      - get: git
+        passed: [deploy-test]
+    - task: deploy
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source: {repository: alpine}
+        run:
+          path: echo
+          args: ["Hello, deploy to prod!"]
