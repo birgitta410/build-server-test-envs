@@ -161,8 +161,18 @@ function setup_concourse() {
 
 }
 
+function setup_gitlab() {
+    # TODO:
+    # Gitlab comes with git out of the box
+    
+    # - Set up a simple repository?
+    # - Add SSH key?
+    echo "Setup gitlab..."
+
+}
+
 function usage() {
-    echo "./go concourse | gocd"
+    echo "./go concourse | gocd | gitlab"
 }
 
 function when_started_concourse() {
@@ -198,11 +208,24 @@ function when_started_gocd() {
 
 }
 
+function when_started_gitlab() {
+    echo ""
+    echo "##################################################################"
+    echo "Gitlab server takes a little bit to start up, wait for it..."
+    echo "Will be running on localhost:8888"
+    echo ""
+    echo "The very first time you visit GitLab, you will be asked to set up the admin password. "
+    echo "After you change it, you can login with username 'root' and the password you set up."
+    echo "##################################################################"
+    docker logs -f gitlab_gitlab_1
+}
+
 function when_started() {
     type=$1
     case ${type} in
         concourse)  when_started_concourse ;;
         gocd)       when_started_gocd ;;
+        gitlab)       when_started_gitlab ;;
         *)          usage ;;
     esac
 }
@@ -236,6 +259,7 @@ function setup_build_server() {
     case ${type} in
         concourse)  setup_concourse ;;
         gocd)       setup_gocd ;;
+        gitlab)     setup_gitlab ;;
         *)          usage ;;
     esac
 
@@ -256,5 +280,6 @@ shift || true
 case ${CMD} in
   concourse)  setup_build_server "concourse" ;;
   gocd)       setup_build_server "gocd" ;;
+  gitlab)       setup_build_server "gitlab" ;;
   *)          usage ;;
 esac

@@ -1,0 +1,13 @@
+version: '2'
+services:
+  gitlab:
+    image: "gitlab/gitlab-ce:latest"
+    ports:
+      - "2223:22"
+      - "4444:443"
+      - "8888:80"
+    volumes:
+      - ../environment/gitlab/gitlab/config:/etc/gitlab
+      - ../environment/gitlab/gitlab/logs:/var/log/gitlab
+    # Creating an issue with file permissions when starting up container (see https://gitlab.com/gitlab-org/omnibus-gitlab/issues/2280)
+    #   - ../environment/gitlab/gitlab/data:/var/opt/gitlab 
