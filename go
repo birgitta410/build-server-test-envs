@@ -3,13 +3,22 @@ set -e
 
 ROOT_DIR=$(pwd)
 
+BLUE='\033[1;34m'
+NC='\033[0m' # No Color
+
+logColoredLine() {
+    printf "${BLUE}${1}${NC}\n"
+}
+
 wait_for_server() {
     local url=$1
     echo -n " waiting for ${url}"
     until curl --output /dev/null --silent --head --fail "$url"; do
+        echo -n " waiting for ${url}"
         printf '.'
         sleep 5
     done
+    logColoredLine "\n${url} is up"
 }
 
 function getEnvDir() {
@@ -24,7 +33,7 @@ function getGitServerDir() {
     echo "${envDir}/git-server"
 }
 
-function getKeyNameForType() {
+function getKeyNameForSetupType() {
     type=$1
     echo "id_rsa_${type}_env"
 }
@@ -60,7 +69,7 @@ function setup_git_server() {
     
     # mkdir $gitServerDir
 
-    keyName=`getKeyNameForType $type`
+    keyName=`getKeyNameForSetupType $type`
     mkdir -p $gitServerDir/keys
     mkdir -p $gitServerDir/repos
 
@@ -97,7 +106,7 @@ function setup_gocd {
     # GO SERVER
     echo "Preparing Go CD server..."
     goServerDir=$envDir/gocd-server
-    keyName=`getKeyNameForType $type`
+    keyName=`getKeyNameForSetupType $type`
 
     mkdir -p $goServerDir/home-dir/.ssh
     mkdir -p $goServerDir/godata
@@ -162,17 +171,13 @@ function setup_concourse() {
 }
 
 function setup_gitlab() {
-    # TODO:
-    # Gitlab comes with git out of the box
     
-    # - Set up a simple repository?
-    # - Add SSH key?
-    echo "Setup gitlab..."
+    logColoredLine "Setup gitlab..."
 
 }
 
 function usage() {
-    echo "./go concourse | gocd | gitlab"
+    echo "./go concourse | gocd | gitlab | gitlab-backup"
 }
 
 function when_started_concourse() {
@@ -201,7 +206,7 @@ function when_started_gocd() {
     echo "##################################################################"
     echo "GoCD server takes a little bit to start up, wait for it..."
     echo "[ tail logs with 'tail -f environment/gocd/gocd-server/godata/logs/go-server.log' ]"
-    echo "...then visit http://0.0.0.0:8153/go/pipelines (using localhost causes CSRF issues)"
+    logColoredLine "...then visit http://0.0.0.0:8153/go/pipelines (using localhost causes CSRF issues)"
     echo "Wait for pipeline configured through JSON plugin to show up under 'Pipelines'."
     echo "Wait for the agent to show up under 'Agents' and enable it."
     echo "##################################################################"
@@ -209,15 +214,39 @@ function when_started_gocd() {
 }
 
 function when_started_gitlab() {
+    
+    wait_for_server "http://localhost:8888"
+
+    gitlabConfigPath=$ROOT_DIR/environment/gitlab/gitlab/etc/gitlab
+
+    cp $ROOT_DIR/gitlab/templates/gitlab.rb ${gitlabConfigPath}/
+    cp $ROOT_DIR/gitlab/templates/gitlab-secrets.json ${gitlabConfigPath}/
+    
+    logColoredLine "Restoring backup file with some basic configuration..."
+    gitlabConfigPath=$ROOT_DIR/environment/gitlab/gitlab/etc/gitlab
+    mkdir ${gitlabConfigPath}/backups
+    cp $ROOT_DIR/gitlab/templates/gitlab_backup.tar ${gitlabConfigPath}/backups/
+    cp $ROOT_DIR/gitlab/restore_backup.sh ${gitlabConfigPath}/backups/
+    docker exec gitlab_gitlab_1 /etc/gitlab/backups/restore_backup.sh
+
     echo ""
     echo "##################################################################"
-    echo "Gitlab server takes a little bit to start up, wait for it..."
-    echo "Will be running on localhost:8888"
+    logColoredLine "Gitlab is running on localhost:8888"    
+    echo "username 'root', password 'Passw0rd1234'"
     echo ""
-    echo "The very first time you visit GitLab, you will be asked to set up the admin password. "
-    echo "After you change it, you can login with username 'root' and the password you set up."
+    logColoredLine "Artifactory is running on localhost:8081"
+    echo "Artifactory user admin:password"
     echo "##################################################################"
-    docker logs -f gitlab_gitlab_1
+
+}
+
+function create_gitlab_backup() {
+    gitlabConfigPath=./environment/gitlab/gitlab/etc/gitlab
+
+    cp $ROOT_DIR/gitlab/create_backup.sh ${gitlabConfigPath}/backups/
+    docker exec gitlab_gitlab_1 /etc/gitlab/backups/create_backup.sh
+    ls ${gitlabConfigPath}/backups/new_gitlab_backup.tar
+    cp ${gitlabConfigPath}/backups/new_gitlab_backup.tar ./gitlab/templates/gitlab_backup.tar
 }
 
 function when_started() {
@@ -225,7 +254,7 @@ function when_started() {
     case ${type} in
         concourse)  when_started_concourse ;;
         gocd)       when_started_gocd ;;
-        gitlab)       when_started_gitlab ;;
+        gitlab)     when_started_gitlab ;;
         *)          usage ;;
     esac
 }
@@ -278,8 +307,9 @@ function setup_build_server() {
 CMD=${1:-}
 shift || true
 case ${CMD} in
-  concourse)  setup_build_server "concourse" ;;
-  gocd)       setup_build_server "gocd" ;;
-  gitlab)       setup_build_server "gitlab" ;;
+  concourse)        setup_build_server "concourse" ;;
+  gocd)             setup_build_server "gocd" ;;
+  gitlab)           setup_build_server "gitlab" ;;
+  gitlab-backup)    create_gitlab_backup ;;
   *)          usage ;;
 esac
