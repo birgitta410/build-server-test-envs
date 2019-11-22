@@ -23,7 +23,7 @@ cd ./environment/<gocd | teamcity | concourse>/git-server/myrepo
 
 ## GoCD
 ```
-./create_gocd.sh
+./go gocd
 ```
 
 Will mount the `godata` directories with logs and config to `./environment/gocd/gocd-server/godata` and `./environment/gocd/gocd-agent1/godata`.
@@ -37,5 +37,13 @@ Will mount directories with logs and config to `./environment/teamcity/teamcity-
 
 ## Concourse
 ```
-./create_concourse.sh
+./go concourse
 ```
+
+## Gitlab
+```
+./go gitlab
+```
+
+* Will mount directories with logs and config to `./environment/gitlab/`. 
+* Creates some basic configuration with a user and a test project by restoring a Gitlab backup. To create a new backup, you can use `./go gitlab-backup`, while the setup is running.
