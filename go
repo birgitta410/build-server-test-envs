@@ -14,7 +14,6 @@ wait_for_server() {
     local url=$1
     echo -n " waiting for ${url}"
     until curl --output /dev/null --silent --head --fail "$url"; do
-        echo -n " waiting for ${url}"
         printf '.'
         sleep 5
     done
@@ -42,14 +41,15 @@ function create_repo() {
     name=$1
     desc=$2
     gitServerDir=$3
+    type=$4
 
-    echo "Creating repo ${name} in ${gitServerDir}/${name}..."
+    echo "Creating repo ${name} in ${gitServerDir}/${name} for setup ${type}..."
 
     mkdir -p $gitServerDir/$name
     echo $desc > $gitServerDir/$name/README.md
     
     # Utility script to send git commands to server later
-    cp $ROOT_DIR/concourse/templates/git_local_server.sh $gitServerDir/$name/
+    cp $ROOT_DIR/${type}/templates/git_local_server.sh $gitServerDir/$name/
     echo "git_local_server.sh" > $gitServerDir/$name/.gitignore
 
     cd $gitServerDir/$name
@@ -65,16 +65,14 @@ function setup_git_server() {
     type=$1
     gitServerDir=`getGitServerDir $type`
 
-    echo "Preparing Git server..."
-    
-    # mkdir $gitServerDir
+    logColoredLine "Preparing Git server dir and keys..."
 
     keyName=`getKeyNameForSetupType $type`
     mkdir -p $gitServerDir/keys
     mkdir -p $gitServerDir/repos
 
     # Create key pair for communication between servers
-    ssh-keygen -t rsa -C "local-concourse" -f $gitServerDir/keys/$keyName -q -N ""
+    ssh-keygen -t rsa -C "local-${type}" -f $gitServerDir/keys/$keyName -q -N ""
 
 }
 
@@ -83,16 +81,18 @@ function setup_gocd {
     envDir=`getEnvDir $type`
     gitServerDir=`getGitServerDir $type`
 
+    logColoredLine "Setup GoCD Server and Agent..."
+
     # GIT REPOS
     repoName=myrepo
     mkdir -p $gitServerDir/$repoName
     cp $ROOT_DIR/templates/randomlyFails.sh $gitServerDir/$repoName/
-    create_repo $repoName "A test repo for local GoCD environment" $gitServerDir
+    create_repo $repoName "A test repo for local GoCD environment" $gitServerDir $type
 
     repoName=gocd-config
     mkdir -p $gitServerDir/$repoName
     cp $ROOT_DIR/gocd/templates/pipeline-config/*.gopipeline.json $gitServerDir/$repoName/
-    create_repo $repoName "A repo to hold Go CD config" $gitServerDir
+    create_repo $repoName "A repo to hold Go CD config" $gitServerDir $type
 
     # Build docker images
     cd $ROOT_DIR/gocd/docker-gocd-server
@@ -139,17 +139,19 @@ function setup_concourse() {
     gitServerDir=`getGitServerDir $type`
     concourseDir=`getEnvDir "${type}/concourse-server"`
 
+    logColoredLine "Setup Concourse..."
+
     # GIT REPO
     repoName=myrepo
     mkdir -p $gitServerDir/$repoName
     ls $gitServerDir/$repoName
     cp $ROOT_DIR/templates/randomlyFails.sh $gitServerDir/$repoName/
-    create_repo $repoName "A test repo for local Concourse environment" $gitServerDir
+    create_repo $repoName "A test repo for local Concourse environment" $gitServerDir $type
 
     repoName=concourse-config
     mkdir -p $gitServerDir/$repoName
     cp $ROOT_DIR/concourse/templates/*.* $gitServerDir/$repoName/
-    create_repo $repoName "A repo to hold Concourse config" $gitServerDir
+    create_repo $repoName "A repo to hold Concourse config" $gitServerDir $type
 
     concourseDir=$envDir/concourse-server
 
@@ -172,8 +174,20 @@ function setup_concourse() {
 
 function setup_gitlab() {
     
+    type=gitlab
+    gitServerDir=`getGitServerDir $type`
+
     logColoredLine "Setup gitlab..."
 
+    # Add the key that we have in the gitlab baseline backup
+    rm -rf ${gitServerDir}/keys
+    cp -r ./gitlab/templates/keys ${gitServerDir}/
+    
+    repoName=test
+    mkdir -p $gitServerDir/$repoName
+    cp $ROOT_DIR/templates/randomlyFails.sh $gitServerDir/$repoName/
+    create_repo $repoName "A test repo for local GoCD environment" $gitServerDir $type
+    
 }
 
 function usage() {
@@ -234,9 +248,6 @@ function when_started_gitlab() {
     logColoredLine "Gitlab is running on localhost:8888"    
     echo "username 'root', password 'Passw0rd1234'"
     echo ""
-    logColoredLine "Artifactory is running on localhost:8081"
-    echo "Artifactory user admin:password"
-    echo "##################################################################"
 
 }
 
@@ -293,7 +304,7 @@ function setup_build_server() {
     esac
 
     ## START THINGS UP
-    echo "Done with prepping things, ready to start!"
+    logColoredLine "Done with prepping things, ready to start up!"
     cd $ROOT_DIR/$type
     docker-compose up -d
 
