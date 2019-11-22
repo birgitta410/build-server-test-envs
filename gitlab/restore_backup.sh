@@ -16,3 +16,16 @@ echo "Restarting..."
 gitlab-ctl reconfigure
 gitlab-ctl restart
 gitlab-rake gitlab:check SANITIZE=true
+
+# https://docs.gitlab.com/ee/raketasks/backup_restore.html#reset-runner-registration-tokens
+echo "Resetting runner tokens..."
+
+resetScriptPath=/etc/gitlab/backups/reset_after_backup.sql
+echo "UPDATE projects SET runners_token = null, runners_token_encrypted = null;" >> ${resetScriptPath}
+echo "UPDATE namespaces SET runners_token = null, runners_token_encrypted = null;" >> ${resetScriptPath}
+echo "UPDATE application_settings SET runners_registration_token_encrypted = null;" >> ${resetScriptPath}
+echo "UPDATE ci_runners SET token = null, token_encrypted = null;" >> ${resetScriptPath}
+echo "\q" >> ${resetScriptPath}
+echo "" >> ${resetScriptPath}
+
+echo "\i /etc/gitlab/backups/reset_after_backup.sql" | gitlab-rails dbconsole
